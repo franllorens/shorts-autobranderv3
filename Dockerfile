@@ -5,29 +5,29 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
-# Instalar FFmpeg + fuentes para subtítulos ASS
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
-    fonts-liberation \
-    fonts-dejavu-core \
-    curl gcc g++ wget \
+    ffmpeg fonts-liberation fonts-dejavu-core curl gcc g++ wget \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY requirements.txt .
 
-# PyTorch CPU primero (evita bajar versión CUDA)
+# numpy<2 primero: torch 2.2.2 fue compilado contra numpy 1.x
+# Si numpy 2.x se instala antes, torch falla con "Numpy is not available"
+RUN pip install --no-cache-dir "numpy<2"
+
+# PyTorch CPU (numpy ya pinneado a 1.x, no se puede actualizar a 2.x)
 RUN pip install --no-cache-dir \
     torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
     --index-url https://download.pytorch.org/whl/cpu
 
+# Whisper + dependencias de la app
 RUN pip install --no-cache-dir setuptools wheel && \
     pip install --no-cache-dir --no-build-isolation openai-whisper==20231117 && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir "numpy<2"
+    pip install --no-cache-dir -r requirements.txt
 
-# Pre-descargar Whisper base en build time (no en runtime)
+# Pre-descargar modelo Whisper base en build time
 RUN python -c "import whisper; whisper.load_model('base'); print('Whisper OK')"
 
 COPY . .
