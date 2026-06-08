@@ -1,34 +1,30 @@
-# ── Entorno y secretos ────────────────────────
+# Entorno y secretos
 .env
 *.env
 
-# ── Python ────────────────────────────────────
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-.Python
 venv/
 env/
 .venv/
 *.egg-info/
 dist/
 build/
-*.egg
 
-# ── Archivos temporales de video ──────────────
+# Archivos temporales de video
 /tmp/
 *.mp4
 *.mp3
 *.wav
 *.srt
+*.ass
 
-# ── IDEs ──────────────────────────────────────
+# IDEs
 .vscode/
 .idea/
 *.swp
-*.swo
 .DS_Store
 
-# ── Railway / Docker ──────────────────────────
+# Railway
 .railway/
