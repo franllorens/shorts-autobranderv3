@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <title>Shorts Autobrander ⚡</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Autobrander" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="/icons/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1290x2796.png" />
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1170x2532.png" />
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1242x2688.png" />
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-828x1792.png" />
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/icons/splash-1125x2436.png" />
+  <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/icons/splash-750x1334.png" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="description" content="Video viral con subtítulos IA en 30 segundos" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #13131a; --surface2: #1c1c27;
+      --border: #2a2a3d; --accent: #7c3aed; --accent2: #06b6d4;
+      --text: #e8e8f0; --muted: #6b6b85; --success: #10b981; --error: #ef4444;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.12; pointer-events: none; z-index: 0; }
+    .orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; right: -100px; }
+    .orb-2 { width: 300px; height: 300px; background: var(--accent2); bottom: 10%; left: -80px; }
+    .wrapper { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; padding: 1.5rem 1rem 2rem; }
+    .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.6rem, 6vw, 2rem); background: linear-gradient(135deg, #a78bfa 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.03em; }
+    .badge { display: inline-block; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent2); background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.25); padding: 2px 8px; border-radius: 99px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem; margin-top: 1.5rem; }
+    .upload-zone { background: var(--surface2); border: 2px dashed var(--border); border-radius: 14px; padding: 1.5rem 1rem; cursor: pointer; text-align: center; transition: border-color 0.2s, background 0.2s; position: relative; }
+    .upload-zone:hover, .upload-zone.active { border-color: var(--accent); background: rgba(124,58,237,0.06); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon { font-size: 2rem; display: block; margin-bottom: 0.4rem; line-height: 1; }
+    .upload-label { font-size: 0.85rem; color: var(--muted); }
+    .upload-name { font-size: 0.82rem; color: var(--accent2); margin-top: 0.4rem; font-weight: 500; word-break: break-all; }
+    .sep { display: flex; align-items: center; gap: 0.75rem; color: var(--muted); font-size: 0.78rem; margin: 1.25rem 0; }
+    .sep::before, .sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .btn-main { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, var(--accent) 0%, #9333ea 100%); color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.02em; border: none; border-radius: 14px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .btn-main:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-main:active:not(:disabled) { transform: translateY(0); }
+    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+    .progress-wrap { background: var(--surface2); border-radius: 99px; height: 6px; overflow: hidden; margin-top: 1rem; }
+    .progress-bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.4s ease; animation: shimmer 1.5s infinite linear; background-size: 200% 100%; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-text { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: 0.75rem; }
+    .step-indicator { display: flex; gap: 0.4rem; justify-content: center; margin-top: 0.75rem; }
+    .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
+    .step-dot.active { background: var(--accent2); }
+    .step-dot.done { background: var(--success); }
+    .result-card { background: var(--surface); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; padding: 1.5rem; margin-top: 1.5rem; animation: slideUp 0.4s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .result-video { width: 100%; border-radius: 12px; background: #000; max-height: 340px; object-fit: contain; }
+    .btn-download { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.85rem; background: linear-gradient(135deg, var(--success), #059669); color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; border: none; border-radius: 14px; cursor: pointer; margin-top: 1rem; text-decoration: none; transition: opacity 0.2s; }
+    .btn-download:hover { opacity: 0.9; }
+    .error-banner { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 0.9rem 1rem; font-size: 0.85rem; color: #fca5a5; margin-top: 1rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+    .info-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.25rem; justify-content: center; }
+    .pill { font-size: 0.72rem; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; }
+    footer { margin-top: auto; padding-top: 2rem; text-align: center; font-size: 0.72rem; color: var(--muted); }
+    .section-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="wrapper">
+    <header style="padding-top:0.5rem">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem">
+        <span style="font-size:1.6rem">⚡</span>
+        <span class="logo-text">Shorts Autobrander</span>
+      </div>
+      <span class="badge">IA · Whisper · FFmpeg</span>
+      <p style="font-size:0.82rem;color:var(--muted);margin-top:0.6rem;line-height:1.5">Sube tu video + logo → recibís tu short con subtítulos virales y branding. En ~30 segundos.</p>
+    </header>
+    <div class="card">
+      <div class="section-label">🎬 Video corto (.mp4)</div>
+      <div class="upload-zone" id="videoZone">
+        <input type="file" id="videoInput" accept="video/mp4,video/*" required />
+        <span class="upload-icon">📹</span>
+        <div class="upload-label">Tocá para seleccionar<br><span style="font-size:0.75rem">MP4 · máx 50 MB · máx 60 seg</span></div>
+        <div class="upload-name hidden" id="videoName"></div>
+      </div>
+      <div class="sep">logo opcional</div>
+      <div class="section-label">🖼️ Tu logo (.png)</div>
+      <div class="upload-zone" id="logoZone">
+        <input type="file" id="logoInput" accept="image/png,image/*" />
+        <span class="upload-icon">🏷️</span>
+        <div class="upload-label">Tocá para seleccionar<br><span style="font-size:0.75rem">PNG · recomendado con fondo transparente</span></div>
+        <div class="upload-name hidden" id="logoName"></div>
+      </div>
+      <button class="btn-main" id="btnProcesar" style="margin-top:1.5rem" disabled>
+        <span id="btnIcon">⚡</span>
+        <span id="btnText">Seleccioná un video para empezar</span>
+      </button>
+      <div id="progressArea" class="hidden">
+        <div class="progress-wrap" style="margin-top:1rem"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="step-indicator">
+          <div class="step-dot" id="dot1"></div><div class="step-dot" id="dot2"></div>
+          <div class="step-dot" id="dot3"></div><div class="step-dot" id="dot4"></div>
+        </div>
+        <p class="status-text" id="statusText">Iniciando…</p>
+      </div>
+      <div class="error-banner hidden" id="errorBanner"><span>⚠️</span><span id="errorText">Error desconocido</span></div>
+    </div>
+    <div class="info-pills">
+      <span class="pill">🎙️ Whisper base</span><span class="pill">🤖 Llama 3.1</span>
+      <span class="pill">🎬 FFmpeg</span><span class="pill">🔒 Se borra al procesar</span>
+    </div>
+    <div class="result-card hidden" id="resultCard">
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+        <span style="font-size:1.2rem">✅</span>
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem">¡Tu short está listo!</span>
+      </div>
+      <video class="result-video" id="resultVideo" controls playsinline></video>
+      <a class="btn-download" id="btnDownload" download="short_branded.mp4">⬇️ Descargar short</a>
+      <button style="width:100%;margin-top:0.75rem;padding:0.6rem;background:none;border:1px solid var(--border);color:var(--muted);border-radius:12px;cursor:pointer;font-size:0.82rem;" onclick="resetApp()">Procesar otro video</button>
+    </div>
+    <footer>Shorts Autobrander · Powered by Groq + Whisper + FFmpeg</footer>
+  </div>
+  <script>
+    const MAX_MB=50,MAX_SEC=60,API_URL='/procesar';
+    const videoInput=document.getElementById('videoInput'),logoInput=document.getElementById('logoInput'),videoZone=document.getElementById('videoZone'),logoZone=document.getElementById('logoZone'),videoName=document.getElementById('videoName'),logoName=document.getElementById('logoName'),btnProcesar=document.getElementById('btnProcesar'),btnIcon=document.getElementById('btnIcon'),btnText=document.getElementById('btnText'),progressArea=document.getElementById('progressArea'),progressBar=document.getElementById('progressBar'),statusText=document.getElementById('statusText'),errorBanner=document.getElementById('errorBanner'),errorText=document.getElementById('errorText'),resultCard=document.getElementById('resultCard'),resultVideo=document.getElementById('resultVideo'),btnDownload=document.getElementById('btnDownload'),dots=[1,2,3,4].map(i=>document.getElementById(`dot${i}`));
+    function setDot(index){dots.forEach(d=>{d.classList.remove('active','done')});for(let i=0;i<index;i++)dots[i].classList.add('done');if(dots[index])dots[index].classList.add('active');}
+    function setProgress(pct,msg,dotIndex){progressBar.style.width=pct+'%';statusText.textContent=msg;if(dotIndex!==undefined)setDot(dotIndex);}
+    function showError(msg){errorText.textContent=msg;errorBanner.classList.remove('hidden');progressArea.classList.add('hidden');setButtonIdle();}
+    function hideError(){errorBanner.classList.add('hidden');}
+    function setButtonIdle(){btnProcesar.disabled=false;btnIcon.innerHTML='⚡';btnText.textContent='Procesar short';const sp=btnProcesar.querySelector('.spinner');if(sp)sp.remove();}
+    function setButtonLoading(){btnProcesar.disabled=true;btnText.textContent='Procesando…';btnIcon.textContent='';const sp=document.createElement('div');sp.className='spinner';btnIcon.appendChild(sp);}
+    function formatBytes(bytes){return(bytes/(1024*1024)).toFixed(1)+' MB';}
+    function validateVideo(file){if(!file)return 'Seleccioná un video.';if(file.size>MAX_MB*1024*1024)return `El video pesa ${formatBytes(file.size)}. Máximo: ${MAX_MB} MB.`;return null;}
+    function validateVideoDuration(file){return new Promise(resolve=>{const url=URL.createObjectURL(file),vid=document.createElement('video');vid.preload='metadata';vid.onloadedmetadata=()=>{URL.revokeObjectURL(url);resolve(vid.duration>MAX_SEC?`El video dura ${Math.round(vid.duration)}s. Máximo: ${MAX_SEC}s.`:null);};vid.onerror=()=>{URL.revokeObjectURL(url);resolve(null);};vid.src=url;});}
+    videoInput.addEventListener('change',()=>{const file=videoInput.files[0];if(file){videoName.textContent=`📎 ${file.name} (${formatBytes(file.size)})`;videoName.classList.remove('hidden');videoZone.classList.add('active');btnProcesar.disabled=false;btnText.textContent='Procesar short';btnIcon.textContent='⚡';hideError();}});
+    logoInput.addEventListener('change',()=>{const file=logoInput.files[0];if(file){logoName.textContent=`📎 ${file.name}`;logoName.classList.remove('hidden');logoZone.classList.add('active');}});
+    [videoZone,logoZone].forEach(zone=>{zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('active');});zone.addEventListener('dragleave',()=>zone.classList.remove('active'));zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('active');const input=zone.querySelector('input[type="file"]');if(e.dataTransfer.files.length){const dt=new DataTransfer();dt.items.add(e.dataTransfer.files[0]);input.files=dt.files;input.dispatchEvent(new Event('change'));}});});
+    btnProcesar.addEventListener('click',async()=>{hideError();resultCard.classList.add('hidden');const videoFile=videoInput.files[0],sizeErr=validateVideo(videoFile);if(sizeErr){showError(sizeErr);return;}const durErr=await validateVideoDuration(videoFile);if(durErr){showError(durErr);return;}setButtonLoading();progressArea.classList.remove('hidden');setProgress(5,'📦 Preparando archivos…',0);const formData=new FormData();formData.append('video',videoFile,videoFile.name);const logoFile=logoInput.files[0];if(logoFile)formData.append('logo',logoFile,logoFile.name);const steps=[{pct:20,msg:'🎙️ Whisper transcribiendo audio…',dot:1},{pct:50,msg:'🤖 Llama generando subtítulos virales…',dot:2},{pct:75,msg:'🎬 FFmpeg quemando subtítulos y logo…',dot:3},{pct:90,msg:'📦 Empaquetando video final…',dot:3}];let stepIndex=0;const fakeProgress=setInterval(()=>{if(stepIndex<steps.length){const s=steps[stepIndex++];setProgress(s.pct,s.msg,s.dot);}},7000);try{const response=await fetch(API_URL,{method:'POST',body:formData});clearInterval(fakeProgress);if(!response.ok){let errMsg=`Error del servidor (${response.status})`;try{const errData=await response.json();errMsg=errData.detail||errMsg;}catch{}showError(errMsg);return;}setProgress(100,'✅ ¡Listo!',4);setTimeout(()=>progressArea.classList.add('hidden'),1200);const blob=await response.blob(),url=URL.createObjectURL(blob);resultVideo.src=url;btnDownload.href=url;resultCard.classList.remove('hidden');resultCard.scrollIntoView({behavior:'smooth',block:'nearest'});setButtonIdle();}catch(err){clearInterval(fakeProgress);showError('No se pudo conectar con el servidor. ¿Está corriendo la app?');setButtonIdle();}});
+    function resetApp(){videoInput.value='';logoInput.value='';videoName.classList.add('hidden');logoName.classList.add('hidden');videoZone.classList.remove('active');logoZone.classList.remove('active');resultCard.classList.add('hidden');progressArea.classList.add('hidden');hideError();btnProcesar.disabled=true;btnText.textContent='Seleccioná un video para empezar';btnIcon.textContent='⚡';if(resultVideo.src)URL.revokeObjectURL(resultVideo.src);resultVideo.src='';btnDownload.href='#';window.scrollTo({top:0,behavior:'smooth'});}
+    if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/service-worker.js').then(reg=>console.log('SW registrado:',reg.scope)).catch(err=>console.log('SW error:',err));});}
+    function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+    function isInStandaloneMode(){return('standalone' in navigator&&navigator.standalone)||window.matchMedia('(display-mode: standalone)').matches;}
+    if(isIOS()&&!isInStandaloneMode()&&!sessionStorage.getItem('pwa-banner-dismissed')){const banner=document.getElementById('install-banner');if(banner){setTimeout(()=>{banner.style.transform='translateY(0)';banner.style.opacity='1';},2500);}}
+    function dismissBanner(){const banner=document.getElementById('install-banner');if(banner){banner.style.transform='translateY(100%)';banner.style.opacity='0';}sessionStorage.setItem('pwa-banner-dismissed','1');}
+  </script>
+  <div id="install-banner" style="position:fixed;bottom:0;left:0;right:0;background:#13131a;border-top:1px solid #2a2a3d;padding:1.1rem 1.2rem 1.4rem;z-index:9999;transform:translateY(100%);opacity:0;transition:transform 0.4s ease,opacity 0.4s ease;box-shadow:0 -8px 32px rgba(0,0,0,0.5);">
+    <div style="width:36px;height:4px;background:#2a2a3d;border-radius:2px;margin:0 auto 1rem;"></div>
+    <div style="display:flex;align-items:center;gap:0.9rem;margin-bottom:0.9rem;">
+      <img src="/icons/apple-touch-icon.png" alt="App icon" style="width:52px;height:52px;border-radius:12px;flex-shrink:0;" />
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:#ffffff;">Instalá Shorts Autobrander</div>
+        <div style="font-size:0.78rem;color:#6b6b85;margin-top:2px;">Agregala a tu pantalla de inicio</div>
+      </div>
+      <button onclick="dismissBanner()" style="margin-left:auto;background:none;border:none;color:#6b6b85;font-size:1.4rem;cursor:pointer;padding:0.25rem;line-height:1;flex-shrink:0;">✕</button>
+    </div>
+    <div style="background:#1c1c27;border-radius:12px;padding:0.9rem 1rem;display:flex;flex-direction:column;gap:0.55rem;">
+      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:#e8e8f0;"><span style="font-size:1.1rem;">1️⃣</span>Tocá el botón<span style="background:#2a2a3d;border-radius:6px;padding:2px 8px;font-size:0.78rem;display:inline-flex;align-items:center;gap:3px;"><svg width="12" height="14" viewBox="0 0 24 28" fill="none" style="vertical-align:middle"><path d="M12 2v16M6 8l6-6 6 6M4 20h16v6H4z" stroke="#06B6D4" stroke-width="2.2" stroke-linecap="round"/></svg>Compartir</span>en Safari</div>
+      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:#e8e8f0;"><span style="font-size:1.1rem;">2️⃣</span>Seleccioná<strong style="color:#7c3aed;">"Añadir a pantalla de inicio"</strong></div>
+      <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:#e8e8f0;"><span style="font-size:1.1rem;">3️⃣</span>Tocá<strong style="color:#10b981;">"Añadir"</strong>— ¡listo! ⚡</div>
+    </div>
+  </div>
+</body>
+</html>
