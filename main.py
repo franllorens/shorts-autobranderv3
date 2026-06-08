@@ -27,9 +27,9 @@ VIDEO_EXTS = {".mp4",".mov",".webm",".mkv",".m4v",".3gp"}
 AUDIO_EXTS = {".mp3",".wav",".m4a",".aac",".ogg"}
 IMAGE_EXTS = {".jpg",".jpeg",".png",".webp"}
 
-# Carga Whisper una sola vez al arrancar
-print("⏳ Cargando Whisper 'base'…")
-WHISPER = whisper.load_model("base")
+# Carga Whisper una sola vez al arrancar (tiny = 39MB, cabe en 512MB RAM)
+print("⏳ Cargando Whisper 'tiny'…")
+WHISPER = whisper.load_model("tiny")
 print("✅ Whisper listo")
 
 app = FastAPI(title="Shorts Autobrander v3")
