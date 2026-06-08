@@ -14,10 +14,9 @@ WORKDIR /app
 COPY requirements.txt .
 
 # numpy<2 primero: torch 2.2.2 fue compilado contra numpy 1.x
-# Si numpy 2.x se instala antes, torch falla con "Numpy is not available"
 RUN pip install --no-cache-dir "numpy<2"
 
-# PyTorch CPU (numpy ya pinneado a 1.x, no se puede actualizar a 2.x)
+# PyTorch CPU
 RUN pip install --no-cache-dir \
     torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
     --index-url https://download.pytorch.org/whl/cpu
@@ -27,8 +26,8 @@ RUN pip install --no-cache-dir setuptools wheel && \
     pip install --no-cache-dir --no-build-isolation openai-whisper==20231117 && \
     pip install --no-cache-dir -r requirements.txt
 
-# Pre-descargar modelo Whisper base en build time
-RUN python -c "import whisper; whisper.load_model('base'); print('Whisper OK')"
+# tiny (~39MB) en lugar de base (~75MB) — cabe en Railway free tier (512MB)
+RUN python -c "import whisper; whisper.load_model('tiny'); print('Whisper OK')"
 
 COPY . .
 
