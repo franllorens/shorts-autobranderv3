@@ -22,7 +22,8 @@ RUN pip install --no-cache-dir \
     torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 \
     --index-url https://download.pytorch.org/whl/cpu
 
-RUN pip install --no-cache-dir setuptools && \
+RUN pip install --no-cache-dir setuptools wheel && \
+    pip install --no-cache-dir --no-build-isolation openai-whisper==20231117 && \
     pip install --no-cache-dir -r requirements.txt
 
 # Pre-descargar Whisper base en build time (no en runtime)
