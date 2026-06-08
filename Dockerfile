@@ -24,7 +24,8 @@ RUN pip install --no-cache-dir \
 
 RUN pip install --no-cache-dir setuptools wheel && \
     pip install --no-cache-dir --no-build-isolation openai-whisper==20231117 && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir "numpy<2"
 
 # Pre-descargar Whisper base en build time (no en runtime)
 RUN python -c "import whisper; whisper.load_model('base'); print('Whisper OK')"
