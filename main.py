@@ -118,6 +118,7 @@ def run(cmd: list, check=True) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, capture_output=True, text=True, check=check)
 
 def normalize_to_mp4(src: Path, dst: Path) -> None:
+    # ultrafast + threads 1 reducen uso de RAM en Railway free tier (512MB)
     ext = src.suffix.lower()
     if ext in IMAGE_EXTS:
         run([
@@ -127,7 +128,8 @@ def normalize_to_mp4(src: Path, dst: Path) -> None:
             "-t", "5",
             "-vf", f"scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=decrease,"
                    f"pad={TARGET_W}:{TARGET_H}:(ow-iw)/2:(oh-ih)/2:black",
-            "-c:v", "libx264", "-c:a", "aac", "-b:a", "192k",
+            "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "28",
+            "-c:a", "aac", "-b:a", "128k",
             "-pix_fmt", "yuv420p", "-shortest",
             str(dst),
         ])
@@ -138,7 +140,8 @@ def normalize_to_mp4(src: Path, dst: Path) -> None:
             "-i", f"color=c=black:s={TARGET_W}x{TARGET_H}:r=30",
             "-i", str(src),
             "-vf", "format=yuv420p",
-            "-c:v", "libx264", "-c:a", "aac", "-b:a", "192k",
+            "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "28",
+            "-c:a", "aac", "-b:a", "128k",
             "-shortest",
             str(dst),
         ])
@@ -148,7 +151,8 @@ def normalize_to_mp4(src: Path, dst: Path) -> None:
             "-vf", f"scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=decrease,"
                    f"pad={TARGET_W}:{TARGET_H}:(ow-iw)/2:(oh-ih)/2:black,"
                    f"format=yuv420p",
-            "-c:v", "libx264", "-c:a", "aac", "-b:a", "192k",
+            "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "28",
+            "-c:a", "aac", "-b:a", "128k",
             str(dst),
         ])
 
@@ -365,7 +369,8 @@ async def transcribe(
                 "-i", str(aud_path),
                 "-vf", f"scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=decrease,"
                        f"pad={TARGET_W}:{TARGET_H}:(ow-iw)/2:(oh-ih)/2:black",
-                "-c:v", "libx264", "-c:a", "aac", "-b:a", "192k",
+                "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "28",
+                "-c:a", "aac", "-b:a", "128k",
                 "-shortest", str(combined),
             ])
             raw_path = combined
@@ -492,8 +497,8 @@ async def export_video(
                 "-filter_complex", filter_complex,
                 "-map", "[vout]",
                 "-map", "0:a?",
-                "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-                "-c:a", "aac", "-b:a", "192k",
+                "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "23",
+                "-c:a", "aac", "-b:a", "128k",
                 "-movflags", "+faststart",
                 str(output_path),
             ]
@@ -502,8 +507,8 @@ async def export_video(
                 "ffmpeg", "-y",
                 "-i", str(norm_path),
                 "-vf", f"ass='{str(ass_path)}'",
-                "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-                "-c:a", "aac", "-b:a", "192k",
+                "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "23",
+                "-c:a", "aac", "-b:a", "128k",
                 "-movflags", "+faststart",
                 str(output_path),
             ]
