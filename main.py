@@ -434,12 +434,13 @@ async def transcribe(
 
         words = []
         for w in (groq_resp.words or []):
-            word_text = (w.word or "").strip()
+            _w = w if isinstance(w, dict) else vars(w)
+            word_text = (_w.get("word") or "").strip()
             if word_text:
                 words.append({
                     "word":  word_text,
-                    "start": round(float(w.start), 3),
-                    "end":   round(float(w.end),   3),
+                    "start": round(float(_w.get("start", 0)), 3),
+                    "end":   round(float(_w.get("end",   0)), 3),
                 })
 
         duration = get_duration(preview_path)
