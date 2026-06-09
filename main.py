@@ -10,7 +10,6 @@ from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 import whisper
 
 # ── Configuración ─────────────────────────────────────────────────
@@ -19,15 +18,12 @@ WORK_DIR.mkdir(parents=True, exist_ok=True)
 
 TARGET_W, TARGET_H = 1080, 1920   # vertical 9:16
 
-FONT_B = "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
-FONT_R = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
-
 # Extensiones aceptadas
 VIDEO_EXTS = {".mp4",".mov",".webm",".mkv",".m4v",".3gp"}
 AUDIO_EXTS = {".mp3",".wav",".m4a",".aac",".ogg"}
 IMAGE_EXTS = {".jpg",".jpeg",".png",".webp"}
 
-# Carga Whisper una sola vez al arrancar (tiny = 39MB, cabe en 512MB RAM)
+# Carga Whisper una sola vez al arrancar (tiny = ~39MB RAM)
 print("⏳ Cargando Whisper 'tiny'…")
 WHISPER = whisper.load_model("tiny")
 print("✅ Whisper listo")
@@ -118,7 +114,7 @@ def run(cmd: list, check=True) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, capture_output=True, text=True, check=check)
 
 def normalize_to_mp4(src: Path, dst: Path) -> None:
-    # ultrafast + threads 1 reducen uso de RAM en Railway free tier (512MB)
+    """Re-encodea a 1080x1920. Solo se usa en /export."""
     ext = src.suffix.lower()
     if ext in IMAGE_EXTS:
         run([
@@ -155,6 +151,33 @@ def normalize_to_mp4(src: Path, dst: Path) -> None:
             "-c:a", "aac", "-b:a", "128k",
             str(dst),
         ])
+
+def make_preview(src: Path, dst: Path) -> None:
+    """Convierte a MP4 compatible con browser SIN re-encodear si es posible."""
+    # Intenta stream copy (instantáneo)
+    r = run([
+        "ffmpeg", "-y", "-i", str(src),
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "96k",
+        "-movflags", "+faststart", str(dst),
+    ], check=False)
+    if r.returncode == 0:
+        return
+    # Fallback: transcode ligero sin cambiar resolución
+    run([
+        "ffmpeg", "-y", "-i", str(src),
+        "-vf", "format=yuv420p",
+        "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "30",
+        "-c:a", "aac", "-b:a", "96k",
+        "-movflags", "+faststart", str(dst),
+    ])
+
+def extract_audio(src: Path, dst: Path) -> None:
+    """Extrae audio a WAV mono 16kHz para Whisper."""
+    run([
+        "ffmpeg", "-y", "-i", str(src),
+        "-vn", "-ar", "16000", "-ac", "1", "-f", "wav",
+        str(dst),
+    ])
 
 def get_duration(path: Path) -> float:
     r = run([
@@ -338,7 +361,7 @@ async def health():
     return {"status": "ok", "whisper": "loaded"}
 
 # ══════════════════════════════════════════════════════════════════
-# POST /transcribe
+# POST /transcribe  — RÁPIDO: no normaliza a 1080x1920
 # ══════════════════════════════════════════════════════════════════
 
 @app.post("/transcribe")
@@ -358,9 +381,10 @@ async def transcribe(
         raw_path = sdir / f"raw{ext}"
         raw_path.write_bytes(await file.read())
 
+        # Para imagen + audio: crear combined primero
         if audio and ext in IMAGE_EXTS:
             aud_ext  = Path(audio.filename or "audio.mp3").suffix.lower()
-            aud_path = sdir / f"audio{aud_ext}"
+            aud_path = sdir / f"audio_upload{aud_ext}"
             aud_path.write_bytes(await audio.read())
             combined = sdir / "combined.mp4"
             run([
@@ -369,17 +393,37 @@ async def transcribe(
                 "-i", str(aud_path),
                 "-vf", f"scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=decrease,"
                        f"pad={TARGET_W}:{TARGET_H}:(ow-iw)/2:(oh-ih)/2:black",
-                "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "28",
-                "-c:a", "aac", "-b:a", "128k",
+                "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "30",
+                "-c:a", "aac", "-b:a", "96k",
                 "-shortest", str(combined),
             ])
-            raw_path = combined
+            src = combined
+        elif ext in AUDIO_EXTS:
+            # Audio puro: crear video negro
+            combined = sdir / "combined.mp4"
+            run([
+                "ffmpeg", "-y",
+                "-f", "lavfi", "-i", f"color=c=black:s=540x960:r=30",
+                "-i", str(raw_path),
+                "-c:v", "libx264", "-preset", "ultrafast", "-threads", "1", "-crf", "30",
+                "-c:a", "aac", "-b:a", "96k",
+                "-shortest", str(combined),
+            ])
+            src = combined
+        else:
+            src = raw_path
 
-        norm_path = sdir / "normalized.mp4"
-        normalize_to_mp4(raw_path, norm_path)
+        # Preview rápido para el editor (stream copy si posible)
+        preview_path = sdir / "normalized.mp4"
+        make_preview(src, preview_path)
 
+        # Extraer audio WAV para Whisper (mucho más rápido que procesar MP4)
+        audio_path = sdir / "audio.wav"
+        extract_audio(src, audio_path)
+
+        # Transcripción
         result = WHISPER.transcribe(
-            str(norm_path),
+            str(audio_path),
             word_timestamps=True,
             fp16=False,
         )
@@ -395,7 +439,7 @@ async def transcribe(
                         "end":   round(w["end"],   3),
                     })
 
-        duration = get_duration(norm_path)
+        duration = get_duration(preview_path)
 
         logo_url = None
         logo_filename = None
@@ -432,7 +476,7 @@ async def transcribe(
         raise HTTPException(500, f"Error en transcripción: {str(e)}")
 
 # ══════════════════════════════════════════════════════════════════
-# POST /export
+# POST /export  — normaliza a 1080x1920 y quema subtítulos
 # ══════════════════════════════════════════════════════════════════
 
 @app.post("/export")
@@ -452,14 +496,25 @@ async def export_video(
     if not sdir.exists():
         raise HTTPException(404, "Sesión no encontrada")
 
-    norm_path = sdir / "normalized.mp4"
-    if not norm_path.exists():
-        raise HTTPException(404, "Video de sesión no encontrado")
-
     try:
         words_list    = json.loads(words)
         overlays_list = json.loads(overlays)
         show_caps     = show_captions.lower() == "true"
+
+        # Buscar el archivo fuente de mayor calidad (raw > combined > normalized)
+        src_candidates = (
+            list(sdir.glob("combined.*")) +
+            list(sdir.glob("raw.*")) +
+            [sdir / "normalized.mp4"]
+        )
+        src_for_export = next((p for p in src_candidates if p.exists()), sdir / "normalized.mp4")
+
+        if not src_for_export.exists():
+            raise HTTPException(404, "Video de sesión no encontrado")
+
+        # Normalizar a 1080x1920 para exportación final
+        norm_path = sdir / "export_norm.mp4"
+        normalize_to_mp4(src_for_export, norm_path)
 
         ass_path = sdir / "subs.ass"
         ass_content = build_ass(
