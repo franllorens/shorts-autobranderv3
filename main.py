@@ -1,7 +1,7 @@
 """
 ╔══════════════════════════════════════════════════════╗
 ║   SHORTS AUTOBRANDER v3  —  FastAPI Backend          ║
-║   Whisper word_timestamps · FFmpeg · ASS subtitles   ║
+║   Groq Whisper · FFmpeg · ASS subtitles              ║
 ╚══════════════════════════════════════════════════════╝
 """
 
@@ -10,7 +10,7 @@ from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import whisper
+from groq import Groq
 
 # ── Configuración ─────────────────────────────────────────────────
 WORK_DIR = Path(tempfile.gettempdir()) / "sab_v3"
@@ -23,10 +23,12 @@ VIDEO_EXTS = {".mp4",".mov",".webm",".mkv",".m4v",".3gp"}
 AUDIO_EXTS = {".mp3",".wav",".m4a",".aac",".ogg"}
 IMAGE_EXTS = {".jpg",".jpeg",".png",".webp"}
 
-# Carga Whisper una sola vez al arrancar (tiny = ~39MB RAM)
-print("⏳ Cargando Whisper 'tiny'…")
-WHISPER = whisper.load_model("tiny")
-print("✅ Whisper listo")
+# Cliente Groq (Whisper large-v3 vía API — sin modelo local)
+_groq_key = os.getenv("GROQ_API_KEY", "")
+if not _groq_key:
+    print("⚠️  GROQ_API_KEY no configurada — transcripción fallará")
+GROQ_CLIENT = Groq(api_key=_groq_key)
+print("✅ Groq listo")
 
 app = FastAPI(title="Shorts Autobrander v3")
 app.add_middleware(CORSMiddleware, allow_origins=["*"],
@@ -358,7 +360,7 @@ async def serve_logo(session: str, filename: str):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "whisper": "loaded"}
+    return {"status": "ok", "groq": "ready"}
 
 # ══════════════════════════════════════════════════════════════════
 # POST /transcribe  — RÁPIDO: no normaliza a 1080x1920
@@ -421,23 +423,24 @@ async def transcribe(
         audio_path = sdir / "audio.wav"
         extract_audio(src, audio_path)
 
-        # Transcripción
-        result = WHISPER.transcribe(
-            str(audio_path),
-            word_timestamps=True,
-            fp16=False,
-        )
+        # Transcripción vía Groq Whisper large-v3 (1-3 segundos)
+        with open(audio_path, "rb") as af:
+            groq_resp = GROQ_CLIENT.audio.transcriptions.create(
+                file=(audio_path.name, af.read()),
+                model="whisper-large-v3",
+                response_format="verbose_json",
+                timestamp_granularities=["word"],
+            )
 
         words = []
-        for seg in result.get("segments", []):
-            for w in seg.get("words", []):
-                word_text = w["word"].strip()
-                if word_text:
-                    words.append({
-                        "word":  word_text,
-                        "start": round(w["start"], 3),
-                        "end":   round(w["end"],   3),
-                    })
+        for w in (groq_resp.words or []):
+            word_text = (w.word or "").strip()
+            if word_text:
+                words.append({
+                    "word":  word_text,
+                    "start": round(float(w.start), 3),
+                    "end":   round(float(w.end),   3),
+                })
 
         duration = get_duration(preview_path)
 
